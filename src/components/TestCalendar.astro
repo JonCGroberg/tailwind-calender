@@ -1,0 +1,205 @@
+<template id="calendar-template">
+  <div
+    class="grid grid-cols-7 border-t border-neutral-600 bg-neutral-700 *:border-neutral-600"
+  >
+    <!-- Days of the week -->
+    <div
+      class="grid col-span-7 grid-cols-subgrid *:px-2 *:py-1 *:border-neutral-600 *:me-[-1px] *:border-x-[1px] bg-neutral-700 *:text-right *:shadow border-b z-20"
+    >
+      <div>1</div>
+      <div>2</div>
+      <div>3</div>
+      <div>4</div>
+      <div>5</div>
+      <div>6</div>
+      <div>7</div>
+    </div>
+    <!-- Events grid -->
+    <div
+      class="events max-h-44 grid-bg grid-flow-dense grid-rows-auto col-span-7 *:bg-teal-900 *:border-teal-600 ps-[0px] pe-[0px] pt-[1px] *:px-3 *:min-h-8 *:ms-[0px] *:me-[0px] gap-y-[1px] gap-x-[1px] hover:*:cursor-pointer hover:*:outline hover:*:z-50 *:hover:outline-1 *:text-wrap grid grid-cols-subgrid *:border *:rounded-sm *:scrollbar-w-1 *:scrollbar *:overflow-hidden scrollbar scrollbar-thumb-neutral-200 scrollbar-track-transparent scrollbar-thumb-rounded scrollbar-h-1 scrollbar-w-1 overflow-x-hidden overflow-y-auto"
+    >
+    </div>
+  </div>
+</template>
+<style>
+  .grid-bg {
+    background-image: linear-gradient(
+      to right,
+      rgb(85, 85, 85) 1px,
+      transparent 0px
+    );
+    background-size: calc(calc(100% / 7)); /* 100% / 7 for 7 columns */
+    background-repeat: repeat;
+  }
+</style>
+
+<template id="event-template">
+  <span class="align-middle">
+    <slot>GovSource Tampa Public Safety Recruiting Summer Expo</slot>
+  </span>
+</template>
+
+
+
+<div id="calendar-holder"></div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // Get the template
+    const calendarTemplate = document.getElementById("calendar-template");
+    const eventTemplate = document.getElementById("event-template");
+    const calendar = (
+      calendarTemplate as HTMLTemplateElement
+    ).content.cloneNode(true);
+    const eventHolder = (calendar as HTMLElement).querySelector(".events");
+
+    // Weekdays content
+    const weekdaysContent = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+    // Events content (example)
+    const eventsContent = [
+      {
+        start: 1,
+        end: 6,
+        text: "Nat'l Asian Peace Officers Association 2024 Annual Leadership Training Symposium & Exposition",
+      },
+      {
+        start: 2,
+        end: 4,
+        text: "GovSource Tampa Public Safety Recruiting Summer Expo",
+      },
+      {
+        start: 1,
+        end: 3,
+        text: "Tampa Law Enforcement Hiring Expo",
+      },
+      {
+        start: 6,
+        end: 8,
+        text: "GovSource Tampa Public Safety Recruiting Summer Expo",
+      },
+      {
+        start: 5,
+        end: 6,
+        text: "GovSource Tampa Public Safety Recruiting Summer Expo",
+      },
+      {
+        start: 1,
+        end: 6,
+        text: "GovSource Tampa Public Safety Recruiting Summer Expo",
+      },
+      {
+        start: 1,
+        end: 6,
+        text: "Nat'l Asian Peace Officers Association 2024 Annual Leadership Training Symposium & Exposition",
+      },
+      {
+        start: 2,
+        end: 4,
+        text: "GovSource Tampa Public Safety Recruiting Summer Expo",
+      },
+      {
+        start: 1,
+        end: 7,
+        text: "Tampa Law Enforcement Hiring Expo",
+      },
+    ];
+
+    // Populate weekdays
+    // const weekdaysPlaceholder = calendar.querySelector("#weekdays-placeholder");
+    // weekdaysPlaceholder.innerHTML = weekdaysContent
+    //   .map(
+    //     (day) =>
+    //       `<div class="col-span-1 px-2 py-1 text-right shadow-none border-x border-neutral-600">${day}</div>`
+    //   )
+    //   .join("");
+
+    // Populate events
+    // const eventsPlaceholder = calendar.querySelector("#events-placeholder");
+    // eventsPlaceholder.innerHTML = eventsContent
+    //   .map(
+    //     (event) => `
+    //   <div class="col-start-${event.start} col-end-${event.end} bg-${event.color}-900 border-${event.color}-600">
+    //     <span class="align-middle">${event.text}</span>
+    //   </div>
+    // `
+    //   )
+    //   .join("");
+
+    eventsContent.forEach((eventContent) => {
+      //   const event = eventTemplate.content.cloneNode(true);
+      //   console.log(event.querySelector("span"));
+      //   event.querySelector("span").textContent = eventContent.text;
+      const event = new CalendarEvent();
+      event.init(eventContent);
+      eventHolder.appendChild(event);
+    });
+
+    // Append to the DOM
+    document.getElementById("calendar-holder").appendChild(calendar);
+  });
+
+  // calendar-event.js
+  class CalendarEvent extends HTMLElement {
+    constructor() {
+      super();
+      this.attachShadow({ mode: "open" });
+      this.loadTemplate("#event-template");
+      this.render();
+    }
+
+    static get observedAttributes() {
+      return ["start", "end", "text"];
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+      this.render();
+    }
+
+    init({ start, end, text }) {
+      this.setAttribute("start", start);
+      this.setAttribute("end", end);
+      this.setAttribute("text", text);
+    }
+
+    loadTemplate(id) {
+      const template = document.querySelector(id);
+      const templateContent = template.content.cloneNode(true);
+      this.shadowRoot.appendChild(templateContent);
+    }
+
+    render() {
+      const start = this.getAttribute("start") || "1";
+      const end = this.getAttribute("end") || "2";
+      const color = this.getAttribute("color") || "blue";
+      const text = this.getAttribute("text") || "";
+
+      const slot = this.shadowRoot.querySelector("span");
+      slot.textContent = text;
+      this.style.gridColumnStart = start;
+      this.style.gridColumnEnd = end;
+      //   const template = `
+      //   <style>
+      //     .event {
+      //       background-color: var(--${color}-900);
+      //       border: 1px solid var(--${color}-600);
+      //       color: white;
+      //       grid-column: ${start} / ${end};
+      //       padding: 0.5rem;
+      //       border-radius: 0.25rem;
+      //       overflow: hidden;
+      //       white-space: nowrap;
+      //       text-overflow: ellipsis;
+      //     }
+      //   </style>
+      //   <div class="event">
+      //     <span class="align-middle">${text}</span>
+      //   </div>
+      // `;
+
+      //   this.shadowRoot.innerHTML = template;
+    }
+  }
+
+  customElements.define("calendar-event", CalendarEvent);
+</script>

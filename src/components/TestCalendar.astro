@@ -127,9 +127,6 @@
     //   .join("");
 
     eventsContent.forEach((eventContent) => {
-      //   const event = eventTemplate.content.cloneNode(true);
-      //   console.log(event.querySelector("span"));
-      //   event.querySelector("span").textContent = eventContent.text;
       const event = new CalendarEvent();
       event.init(eventContent);
       eventHolder.appendChild(event);

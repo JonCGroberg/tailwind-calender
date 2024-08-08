@@ -1,145 +1,135 @@
-<template id="calendar-template">
+<template id="week-template">
   <div
-    class="grid grid-cols-7 border-t border-neutral-600 bg-neutral-700 *:border-neutral-600"
+    class="grid grid-cols-7 border-0 border-neutral-600 bg-neutral-700 overflow-hidden"
   >
-    <!-- Days of the week -->
+    <!-- Days of the month for each day -->
     <div
-      class="grid col-span-7 grid-cols-subgrid *:px-2 *:py-1 *:border-neutral-600 *:me-[-1px] *:border-x-[1px] bg-neutral-700 *:text-right *:shadow border-b z-20"
+      class="dayOfMonths grid col-span-7 grid-cols-subgrid bg-neutral-700 overflow-hidden shadow z-20 border-neutral-600 border-y-[1px]"
     >
-      <div>1</div>
-      <div>2</div>
-      <div>3</div>
-      <div>4</div>
-      <div>5</div>
-      <div>6</div>
-      <div>7</div>
     </div>
     <!-- Events grid -->
     <div
-      class="events max-h-44 grid-bg grid-flow-dense grid-rows-auto col-span-7 *:bg-teal-900 *:border-teal-600 ps-[0px] pe-[0px] pt-[1px] *:px-3 *:min-h-8 *:ms-[0px] *:me-[0px] gap-y-[1px] gap-x-[1px] hover:*:cursor-pointer hover:*:outline hover:*:z-50 *:hover:outline-1 *:text-wrap grid grid-cols-subgrid *:border *:rounded-sm *:scrollbar-w-1 *:scrollbar *:overflow-hidden scrollbar scrollbar-thumb-neutral-200 scrollbar-track-transparent scrollbar-thumb-rounded scrollbar-h-1 scrollbar-w-1 overflow-x-hidden overflow-y-auto"
+      class="events h-32 grid-bg grid-flow-dense grid-rows-auto col-span-7 *:h-8 ps-[0px] pe-[0px] py-[0px] gap-y-[1px] gap-x-[1px] grid grid-cols-subgrid scrollbar scrollbar-thumb-neutral-200 scrollbar-track-transparent scrollbar-thumb-rounded scrollbar-h-1 scrollbar-w-1 overflow-x-hidden overflow-y-auto"
     >
     </div>
   </div>
+  <style>
+    .grid-bg {
+      background-image: linear-gradient(
+        to right,
+        rgb(85, 85, 85) 1px,
+        transparent 0px
+      );
+      background-size: calc(calc(100% / 7)); /* 100% / 7 for 7 columns */
+      background-repeat: repeat;
+    }
+  </style></template
+>
+
+<template id="dayHeaderTemplate">
+  <div
+    class="px-2 py-1 border-neutral-600 me-[-1px] border-e-[1px] text-right z-10"
+  >
+  </div>
 </template>
-<style>
-  .grid-bg {
-    background-image: linear-gradient(
-      to right,
-      rgb(85, 85, 85) 1px,
-      transparent 0px
-    );
-    background-size: calc(calc(100% / 7)); /* 100% / 7 for 7 columns */
-    background-repeat: repeat;
-  }
-</style>
 
-<template id="event-template">
-  <span class="align-middle">
-    <slot>GovSource Tampa Public Safety Recruiting Summer Expo</slot>
-  </span>
+<template id="event-template"
+  ><div
+    class="px-3 min-h-8 ms-[0px] me-[0px] bg-teal-900 border-teal-700 border rounded scrollbar-w-1 scrollbar overflow-hidden h-0"
+  >
+    <span class="align-middle">
+      <slot>GovSource Tampa Public Safety Recruiting Summer Expo</slot>
+    </span>
+  </div>
 </template>
 
+<template id="calendar-template">
+  <div
+    class="bg-neutral-700 rounded overflow-hidden border border-neutral-600 shadow"
+  >
+    <div class="grid grid-cols-7 *:text-center py-2">
+      <div>Sun</div>
+      <div>Mon</div>
+      <div>Tue</div>
+      <div>Wed</div>
+      <div>Thur</div>
+      <div>Fri</div>
+      <div>Sat</div>
+    </div>
+    <div class="weeks"></div>
+  </div>
+</template>
 
-
-<div id="calendar-holder"></div>
+<custom-calender></custom-calender>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    // Get the template
-    const calendarTemplate = document.getElementById("calendar-template");
-    const eventTemplate = document.getElementById("event-template");
-    const calendar = (
-      calendarTemplate as HTMLTemplateElement
-    ).content.cloneNode(true);
-    const eventHolder = (calendar as HTMLElement).querySelector(".events");
+  const utils = {
+    padNumber: (num) => num.toString().padStart(2, "0"),
+    stripDateFromDatetime: (datetime) => datetime.substring(0, 10),
+    stripTimeFromDatetime: (datetime) => datetime.substring(11, 16),
+    stripMonthFromDatetime: (datetime) => datetime.substring(5, 7),
+    stripYearFromDatetime: (datetime) => datetime.substring(0, 4),
+    daysInMonth: (year, month) => new Date(year, month, 0).getDate(),
+    firstDayOfMonth: (year, month) => new Date(year, month, 1).getDay(),
+  };
+  // const dateToMonthYear = (datetime) =>
+  //   `${months[Number(stripMonthFromDatetime(datetime)) - 1]} ${stripYearFromDatetime(datetime)}`;
+  // const toAmPm = (time) => {
+  //   const [hours, minutes] = time.split(":");
+  //   const ampm = Number(hours) >= 12 ? "PM" : "AM";
+  //   return `${Number(hours) % 12 || 12}:${minutes} ${ampm}`;
+  // };
 
-    // Weekdays content
-    const weekdaysContent = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-    // Events content (example)
-    const eventsContent = [
-      {
-        start: 1,
-        end: 6,
-        text: "Nat'l Asian Peace Officers Association 2024 Annual Leadership Training Symposium & Exposition",
-      },
-      {
-        start: 2,
-        end: 4,
-        text: "GovSource Tampa Public Safety Recruiting Summer Expo",
-      },
-      {
-        start: 1,
-        end: 3,
-        text: "Tampa Law Enforcement Hiring Expo",
-      },
-      {
-        start: 6,
-        end: 8,
-        text: "GovSource Tampa Public Safety Recruiting Summer Expo",
-      },
-      {
-        start: 5,
-        end: 6,
-        text: "GovSource Tampa Public Safety Recruiting Summer Expo",
-      },
-      {
-        start: 1,
-        end: 6,
-        text: "GovSource Tampa Public Safety Recruiting Summer Expo",
-      },
-      {
-        start: 1,
-        end: 6,
-        text: "Nat'l Asian Peace Officers Association 2024 Annual Leadership Training Symposium & Exposition",
-      },
-      {
-        start: 2,
-        end: 4,
-        text: "GovSource Tampa Public Safety Recruiting Summer Expo",
-      },
-      {
-        start: 1,
-        end: 7,
-        text: "Tampa Law Enforcement Hiring Expo",
-      },
-    ];
-
-    // Populate weekdays
-    // const weekdaysPlaceholder = calendar.querySelector("#weekdays-placeholder");
-    // weekdaysPlaceholder.innerHTML = weekdaysContent
-    //   .map(
-    //     (day) =>
-    //       `<div class="col-span-1 px-2 py-1 text-right shadow-none border-x border-neutral-600">${day}</div>`
-    //   )
-    //   .join("");
-
-    // Populate events
-    // const eventsPlaceholder = calendar.querySelector("#events-placeholder");
-    // eventsPlaceholder.innerHTML = eventsContent
-    //   .map(
-    //     (event) => `
-    //   <div class="col-start-${event.start} col-end-${event.end} bg-${event.color}-900 border-${event.color}-600">
-    //     <span class="align-middle">${event.text}</span>
-    //   </div>
-    // `
-    //   )
-    //   .join("");
-
-    eventsContent.forEach((eventContent) => {
-      const event = new CalendarEvent();
-      event.init(eventContent);
-      eventHolder.appendChild(event);
-    });
-
-    // Append to the DOM
-    document.getElementById("calendar-holder").appendChild(calendar);
-  });
-  // calendar-event.js
+  const eventsContent = [
+    {
+      start: 1,
+      end: 6,
+      text: "Nat'l Asian Peace Officers Association 2024 Annual Leadership Training Symposium & Exposition",
+    },
+    {
+      start: 2,
+      end: 4,
+      text: "GovSource Tampa Public Safety Recruiting Summer Expo",
+    },
+    {
+      start: 1,
+      end: 3,
+      text: "Tampa Law Enforcement Hiring Expo",
+    },
+    {
+      start: 6,
+      end: 8,
+      text: "GovSource Tampa Public Safety Recruiting Summer Expo",
+    },
+    {
+      start: 5,
+      end: 6,
+      text: "GovSource Tampa Public Safety Recruiting Summer Expo",
+    },
+    {
+      start: 1,
+      end: 6,
+      text: "GovSource Tampa Public Safety Recruiting Summer Expo",
+    },
+    {
+      start: 1,
+      end: 6,
+      text: "Nat'l Asian Peace Officers Association 2024 Annual Leadership Training Symposium & Exposition",
+    },
+    {
+      start: 2,
+      end: 4,
+      text: "GovSource Tampa Public Safety Recruiting Summer Expo",
+    },
+    {
+      start: 1,
+      end: 7,
+      text: "Tampa Law Enforcement Hiring Expo",
+    },
+  ];
   class CalendarEvent extends HTMLElement {
     constructor() {
       super();
-      this.attachShadow({ mode: "open" });
       this.loadTemplate("#event-template");
       this.render();
     }
@@ -161,7 +151,7 @@
     loadTemplate(id) {
       const template = document.querySelector(id);
       const templateContent = template.content.cloneNode(true);
-      this.shadowRoot.appendChild(templateContent);
+      this.appendChild(templateContent);
     }
 
     render() {
@@ -170,12 +160,141 @@
       const color = this.getAttribute("color") || "blue";
       const text = this.getAttribute("text") || "";
 
-      const slot = this.shadowRoot.querySelector("span");
+      const slot = this.querySelector("span");
       slot.textContent = text;
       this.style.gridColumnStart = start;
       this.style.gridColumnEnd = end;
     }
   }
 
+  class CalendarWeek extends HTMLElement {
+    dayHeaderTemplate = document.getElementById("dayHeaderTemplate");
+    days = [];
+
+    constructor(days) {
+      super();
+      this.days = days;
+      this.loadTemplate("#week-template");
+      this.render();
+    }
+
+    loadTemplate(id) {
+      const template = document.querySelector(id);
+      const templateContent = template.content.cloneNode(true);
+      this.appendChild(templateContent);
+    }
+
+    populateEvents() {
+      const eventHolder = this.querySelector(".events");
+      eventsContent.forEach((eventContent) => {
+        const event = new CalendarEvent();
+        event.init(eventContent);
+        eventHolder.appendChild(event);
+      });
+    }
+
+    populateWeekHeader() {
+      const dayOfMonthsHolder = this.querySelector(".dayOfMonths");
+      for (const day of this.days) {
+        const dayHeader = this.dayHeaderTemplate.content.cloneNode(true);
+        dayHeader.querySelector("div").textContent = String(day);
+        dayOfMonthsHolder.appendChild(dayHeader);
+      }
+    }
+
+    render() {
+      this.populateWeekHeader();
+      this.populateEvents();
+    }
+  }
+
+  class CustomCalender extends HTMLElement {
+    days = [1, 2, 3, 4, 5, 6, 7];
+    selectedYear=2022;
+    selectedMonth=1;
+    firstDayOfCurrentMonth=0;
+    daysInCurrentMonth=0;
+
+    constructor() {
+      super();
+      this.loadTemplate("#calendar-template");
+      this.render();
+    }
+
+    loadTemplate(id) {
+      const template = document.querySelector(id);
+      const templateContent = template.content.cloneNode(true);
+      this.appendChild(templateContent);
+    }
+
+    generateWeeks() {
+      const numOfWeeks = Math.ceil(this.days.length / 7);
+      const weeks = document.createDocumentFragment();
+      for (let i = 0; i < numOfWeeks; i++) {
+        const week = new CalendarWeek(this.days);
+        weeks.appendChild(week);
+      }
+      return weeks;
+    }
+
+    generateDaysArray() {
+      this.days = utils.daysInMonth(this.selectedYear, this.selectedMonth + 1);
+      this.firstDayOfCurrentMonth = utils.firstDayOfMonth(
+        this.selectedYear,
+        this.selectedMonth
+      );
+      for (let i = 0; i < this.daysInCurrentMonth; i++) {
+        const date = {
+          month: this.selectedMonth,
+          date: i + 1,
+          year: this.selectedYear,
+          weekDay: (this.firstDayOfCurrentMonth + i) % 7,
+          isToday:
+            today.getDate() == i + 1 &&
+            today.getMonth() == this.selectedMonth &&
+            today.getFullYear() == this.selectedYear,
+        };
+        this.days.push(date);
+      }
+      // for (let i = 0; i < this.firstDayOfCurrentMonth; i++) {
+      //   this.weekDaysFromLastMonth.push({
+      //     month: this.selectedMonth === 0 ? 11 : this.selectedMonth - 1,
+      //     year:
+      //       this.selectedMonth === 0
+      //         ? this.selectedYear - 1
+      //         : this.selectedYear,
+      //     date:
+      //       daysInMonth(this.selectedMonth, this.selectedMonth) +
+      //       i -
+      //       this.firstDayOfCurrentMonth +
+      //       1,
+      //     weekDay: (this.firstDayOfCurrentMonth - i) % 7,
+      //   });
+      // }
+      // for (
+      //   let i = this.days[this.days.length - 1].weekDay, date = 1;
+      //   i < 6;
+      //   i++, date++
+      // ) {
+      //   this.weekDaysInNextMonth.push({
+      //     month: this.selectedMonth === 1 ? 11 : this.selectedMonth + 1,
+      //     year:
+      //       this.selectedMonth === 11
+      //         ? this.selectedYear + 1
+      //         : this.selectedYear,
+      //     date,
+      //     weekDay: (this.firstDayOfCurrentMonth + this.days.length + i) % 7,
+      //   });
+      // }
+    }
+
+    render() {
+      const weeks = this.generateWeeks();
+      this.querySelector(".weeks").appendChild(weeks);
+    }
+  }
+
   customElements.define("calendar-event", CalendarEvent);
+  customElements.define("calendar-week", CalendarWeek);
+  customElements.define("custom-calender", CustomCalender);
 </script>

@@ -4,12 +4,12 @@
   >
     <!-- Days of the month for each day -->
     <div
-      class="dayOfMonths grid col-span-7 grid-cols-subgrid bg-neutral-700 overflow-hidden shadow z-20 border-neutral-600 border-y-[1px]"
+      class="dayOfMonths grid col-span-7 grid-cols-subgrid bg-neutral-700 border-neutral-600 border-y-[1px] -mb-32 h-[164px] z-0"
     >
     </div>
     <!-- Events grid -->
     <div
-      class="events h-32 grid-bg grid-flow-dense grid-rows-auto col-span-7 *:h-8 ps-[0px] pe-[0px] py-[0px] gap-y-[1px] gap-x-[1px] grid grid-cols-subgrid scrollbar scrollbar-thumb-neutral-200 scrollbar-track-transparent scrollbar-thumb-rounded scrollbar-h-1 scrollbar-w-1 overflow-x-hidden overflow-y-auto"
+      class="events border-t border-neutral-600 z-10 h-32 grid-flow-dense grid-rows-auto col-span-7 *:h-8 ps-[0px] pe-[0px] py-[1px] gap-y-[1px] gap-x-[1px] grid grid-cols-subgrid scrollbar scrollbar-thumb-neutral-200 scrollbar-track-transparent scrollbar-thumb-rounded scrollbar-h-1 scrollbar-w-1 overflow-x-hidden overflow-y-auto"
     >
     </div>
   </div>
@@ -35,7 +35,7 @@
 
 <template id="event-template"
   ><div
-    class="px-3 min-h-8 ms-[0px] me-[0px] bg-teal-900 border-teal-700 border rounded scrollbar-w-1 scrollbar overflow-hidden h-0"
+    class="px-3 min-h-8 ms-[0px] me-[0px] bg-teal-900 border-teal-700 border rounded scrollbar-w-1 scrollbar overflow-hidden h-0 text-base"
   >
     <span class="align-middle">
       <slot>GovSource Tampa Public Safety Recruiting Summer Expo</slot>
@@ -45,8 +45,13 @@
 
 <template id="calendar-template">
   <div
-    class="bg-neutral-700 rounded overflow-hidden border border-neutral-600 shadow"
+    class="bg-neutral-700 rounded overflow-hidden border border-neutral-600 text-lg"
   >
+    <div
+      class="py-2 text-center text-lg border-b border-x-0 border-neutral-600"
+    >
+      August 2024
+    </div>
     <div class="grid grid-cols-7 *:text-center py-2">
       <div>Sun</div>
       <div>Mon</div>
@@ -63,15 +68,14 @@
 <custom-calender></custom-calender>
 
 <script>
-  const utils = {
-    padNumber: (num) => num.toString().padStart(2, "0"),
-    stripDateFromDatetime: (datetime) => datetime.substring(0, 10),
-    stripTimeFromDatetime: (datetime) => datetime.substring(11, 16),
-    stripMonthFromDatetime: (datetime) => datetime.substring(5, 7),
-    stripYearFromDatetime: (datetime) => datetime.substring(0, 4),
-    daysInMonth: (year, month) => new Date(year, month, 0).getDate(),
-    firstDayOfMonth: (year, month) => new Date(year, month, 1).getDay(),
-  };
+  const today = new Date();
+  const padNumber = (num) => num.toString().padStart(2, "0");
+  const stripDateFromDatetime = (datetime) => datetime.substring(0, 10);
+  const stripTimeFromDatetime = (datetime) => datetime.substring(11, 16);
+  const stripMonthFromDatetime = (datetime) => datetime.substring(5, 7);
+  const stripYearFromDatetime = (datetime) => datetime.substring(0, 4);
+  const daysInMonth = (year, month) => new Date(year, month, 0).getDate();
+  const firstWeekDay = (year, month) => new Date(year, month, 1).getDay();
   // const dateToMonthYear = (datetime) =>
   //   `${months[Number(stripMonthFromDatetime(datetime)) - 1]} ${stripYearFromDatetime(datetime)}`;
   // const toAmPm = (time) => {
@@ -79,7 +83,6 @@
   //   const ampm = Number(hours) >= 12 ? "PM" : "AM";
   //   return `${Number(hours) % 12 || 12}:${minutes} ${ampm}`;
   // };
-
   const eventsContent = [
     {
       start: 1,
@@ -169,7 +172,7 @@
 
   class CalendarWeek extends HTMLElement {
     dayHeaderTemplate = document.getElementById("dayHeaderTemplate");
-    days = [];
+    days;
 
     constructor(days) {
       super();
@@ -195,9 +198,16 @@
 
     populateWeekHeader() {
       const dayOfMonthsHolder = this.querySelector(".dayOfMonths");
-      for (const day of this.days) {
+      console.log(this.days);
+      for (const { month, date, year, weekDay, isToday, isThisMonth } of this
+        .days) {
         const dayHeader = this.dayHeaderTemplate.content.cloneNode(true);
-        dayHeader.querySelector("div").textContent = String(day);
+        dayHeader.querySelector("div").textContent = String(date);
+        if (!isThisMonth) {
+          dayHeader
+            .querySelector("div")
+            .classList.add("text-white", "bg-neutral-800", "opacity-30","border-neutral-500");
+        }
         dayOfMonthsHolder.appendChild(dayHeader);
       }
     }
@@ -209,16 +219,27 @@
   }
 
   class CustomCalender extends HTMLElement {
-    days = [1, 2, 3, 4, 5, 6, 7];
-    selectedYear=2022;
-    selectedMonth=1;
-    firstDayOfCurrentMonth=0;
-    daysInCurrentMonth=0;
+    days = [];
+    selectedYear = 2024;
+    selectedMonth = 7;
+    firstWeekday = 0;
+    daysThisMonth = 0;
+
+    static get observedAttributes() {
+      return ["year", "month"];
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+      this.render();
+    }
+
 
     constructor() {
       super();
       this.loadTemplate("#calendar-template");
       this.render();
+      this.setAttribute("year", String(this.selectedYear));
+      this.setAttribute("month", String(this.selectedMonth));
     }
 
     loadTemplate(id) {
@@ -231,64 +252,78 @@
       const numOfWeeks = Math.ceil(this.days.length / 7);
       const weeks = document.createDocumentFragment();
       for (let i = 0; i < numOfWeeks; i++) {
-        const week = new CalendarWeek(this.days);
+        const week = new CalendarWeek(this.days.slice(i * 7, (i + 1) * 7));
         weeks.appendChild(week);
       }
+      console.log(weeks);
       return weeks;
     }
 
     generateDaysArray() {
-      this.days = utils.daysInMonth(this.selectedYear, this.selectedMonth + 1);
-      this.firstDayOfCurrentMonth = utils.firstDayOfMonth(
-        this.selectedYear,
-        this.selectedMonth
-      );
-      for (let i = 0; i < this.daysInCurrentMonth; i++) {
+      const days = [];
+      this.daysThisMonth = daysInMonth(this.selectedYear, this.selectedMonth);
+      this.firstWeekday = firstWeekDay(this.selectedYear, this.selectedMonth);
+
+      // Add days from previous month
+      for (let i = 0; i < this.firstWeekday; i++) {
+        const date = {
+          month: this.selectedMonth === 0 ? 11 : this.selectedMonth - 1,
+          year:
+            this.selectedMonth === 0
+              ? this.selectedYear - 1
+              : this.selectedYear,
+          date:
+            daysInMonth(this.selectedMonth, this.selectedMonth) +
+            i -
+            this.firstWeekday +
+            1,
+          weekDay: (this.firstWeekday - i) % 7,
+          isToday: false,
+          isThisMonth: false,
+        };
+        days.push(date);
+      }
+      // Add days from current month
+      for (let i = 0; i < this.daysThisMonth; i++) {
         const date = {
           month: this.selectedMonth,
           date: i + 1,
           year: this.selectedYear,
-          weekDay: (this.firstDayOfCurrentMonth + i) % 7,
+          weekDay: (this.firstWeekday + i) % 7,
           isToday:
             today.getDate() == i + 1 &&
             today.getMonth() == this.selectedMonth &&
             today.getFullYear() == this.selectedYear,
+          isThisMonth: true,
         };
-        this.days.push(date);
+        days.push(date);
       }
-      // for (let i = 0; i < this.firstDayOfCurrentMonth; i++) {
-      //   this.weekDaysFromLastMonth.push({
-      //     month: this.selectedMonth === 0 ? 11 : this.selectedMonth - 1,
-      //     year:
-      //       this.selectedMonth === 0
-      //         ? this.selectedYear - 1
-      //         : this.selectedYear,
-      //     date:
-      //       daysInMonth(this.selectedMonth, this.selectedMonth) +
-      //       i -
-      //       this.firstDayOfCurrentMonth +
-      //       1,
-      //     weekDay: (this.firstDayOfCurrentMonth - i) % 7,
-      //   });
-      // }
-      // for (
-      //   let i = this.days[this.days.length - 1].weekDay, date = 1;
-      //   i < 6;
-      //   i++, date++
-      // ) {
-      //   this.weekDaysInNextMonth.push({
-      //     month: this.selectedMonth === 1 ? 11 : this.selectedMonth + 1,
-      //     year:
-      //       this.selectedMonth === 11
-      //         ? this.selectedYear + 1
-      //         : this.selectedYear,
-      //     date,
-      //     weekDay: (this.firstDayOfCurrentMonth + this.days.length + i) % 7,
-      //   });
-      // }
+      // Add days from next month
+      for (
+        let i = days[days.length - 1].weekDay, dayOfMonth = 1;
+        i < 6;
+        i++, dayOfMonth++
+      ) {
+        const date = {
+          month: this.selectedMonth === 1 ? 11 : this.selectedMonth + 1,
+          year:
+            this.selectedMonth === 11
+              ? this.selectedYear + 1
+              : this.selectedYear,
+          dayOfMonth,
+          date: (this.firstWeekday + this.days.length + i - 1) % 7,
+          isToday: false,
+          weekDay: i,
+          isThisMonth: false,
+        };
+        days.push(date);
+      }
+
+      return days;
     }
 
     render() {
+      this.days = this.generateDaysArray();
       const weeks = this.generateWeeks();
       this.querySelector(".weeks").appendChild(weeks);
     }

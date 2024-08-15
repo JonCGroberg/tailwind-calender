@@ -4,12 +4,12 @@
   >
     <!-- Days of the month for each day -->
     <div
-      class="dayOfMonths grid col-span-7 grid-cols-subgrid bg-neutral-700 border-neutral-600 border-y-[1px] -mb-32 h-[164px] z-0"
+      class="dayOfMonths grid col-span-7 grid-cols-subgrid bg-neutral-700 border-neutral-600 border-t-[1px] -mb-32 h-[164px] z-0"
     >
     </div>
     <!-- Events grid -->
     <div
-      class="events border-t border-neutral-600 z-10 h-32 grid-flow-dense grid-rows-auto col-span-7 *:h-8 ps-[0px] pe-[0px] py-[1px] gap-y-[1px] gap-x-[1px] grid grid-cols-subgrid scrollbar scrollbar-thumb-neutral-200 scrollbar-track-transparent scrollbar-thumb-rounded scrollbar-h-1 scrollbar-w-1 overflow-x-hidden overflow-y-auto"
+      class="events border-t border-neutral-600 z-10 h-32 grid-flow-dense grid-rows-auto col-span-7 *:h-8 ps-[1px] pe-[1px] py-[1px] gap-y-[1px] gap-x-[1px] grid grid-cols-subgrid scrollbar scrollbar-thumb-neutral-200 scrollbar-track-transparent scrollbar-thumb-rounded scrollbar-h-1 scrollbar-w-1 overflow-x-hidden overflow-y-auto"
     >
     </div>
   </div>
@@ -83,51 +83,84 @@
   //   const ampm = Number(hours) >= 12 ? "PM" : "AM";
   //   return `${Number(hours) % 12 || 12}:${minutes} ${ampm}`;
   // };
+  Date.prototype.addDays = function (days) {
+    var date = new Date(this.valueOf());
+    date.setDate(date.getDate() + days);
+    return date;
+  };
+
   const eventsContent = [
     {
-      start: 1,
-      end: 6,
-      text: "Nat'l Asian Peace Officers Association 2024 Annual Leadership Training Symposium & Exposition",
+      eventId: 224,
+      eventName: "GovSource Tampa Public Safety Recruiting Summer Expo",
+      startTime: "2024-08-14T11:00:00",
+      endTime: "2024-08-14T15:00:00",
+      isAllDay: false,
+      locationName: "Hampton Inn \u0026 Suites Tampa/Ybor City/Downtown",
+      address: "1301 E. 7th Avenue",
+      cityStateZip: "Tampa, FL 33605",
+      eventDetails:
+        "Hillsborough County Sheriff\u0027s Office Recruiters will be at this event to explain sworn and civilian career opportunities and assist with applying to our Office.",
     },
     {
-      start: 2,
-      end: 4,
-      text: "GovSource Tampa Public Safety Recruiting Summer Expo",
+      eventId: 254,
+      eventName: "Tampa Law Enforcement Hiring Expo",
+      startTime: "2024-08-29T11:00:00",
+      endTime: "2024-08-29T14:00:00",
+      isAllDay: false,
+      locationName: "Marriott Tampa Westshore ",
+      address: "1001 N. Westshore Blvd.",
+      cityStateZip: "Tampa, FL 33607",
+      eventDetails:
+        "Hillsborough County Sheriff\u0027s Office Recruiters will be at this event to explain sworn and civilian career opportunities and assist with applying to our Office.",
     },
     {
-      start: 1,
-      end: 3,
-      text: "Tampa Law Enforcement Hiring Expo",
+      eventId: 255,
+      eventName: "Orlando Law Enforcement Hiring Expo",
+      startTime: "2024-09-25T10:00:00",
+      endTime: "2024-09-25T14:00:00",
+      isAllDay: false,
+      locationName: "Rosen Inn Lake Buena Vista",
+      address: "8442 Palm Pkwy",
+      cityStateZip: "Lake Buena Vista, FL 32836",
+      eventDetails:
+        "Hillsborough County Sheriff\u0027s Office Recruiters will be at this event to explain sworn and civilian career opportunities and assist with applying to our Office.",
     },
     {
-      start: 6,
-      end: 8,
-      text: "GovSource Tampa Public Safety Recruiting Summer Expo",
+      eventId: 256,
+      eventName: "Tampa Veteran\u0027s Job Fair",
+      startTime: "2024-10-10T11:00:00",
+      endTime: "2024-10-10T15:00:00",
+      isAllDay: false,
+      locationName: "Tampa Convention Center",
+      address: "333 S. Franklin Street",
+      cityStateZip: "Tampa, FL 33602",
+      eventDetails:
+        "Hillsborough County Sheriff\u0027s Office Recruiters will be at this event to explain sworn and civilian career opportunities and assist with applying to our Office.",
     },
     {
-      start: 5,
-      end: 6,
-      text: "GovSource Tampa Public Safety Recruiting Summer Expo",
+      eventId: 257,
+      eventName: "Jacksonville Veteran\u0027s Job Fair",
+      startTime: "2024-11-14T11:00:00",
+      endTime: "2024-11-14T15:00:00",
+      isAllDay: false,
+      locationName: "EverBank Stadium",
+      address: "1 EverBank Stadium Drive",
+      cityStateZip: "Jacksonville, FL 32202",
+      eventDetails:
+        "Hillsborough County Sheriff\u0027s Office Recruiters will be at this event to explain sworn and civilian career opportunities and assist with applying to our Office.",
     },
     {
-      start: 1,
-      end: 6,
-      text: "GovSource Tampa Public Safety Recruiting Summer Expo",
-    },
-    {
-      start: 1,
-      end: 6,
-      text: "Nat'l Asian Peace Officers Association 2024 Annual Leadership Training Symposium & Exposition",
-    },
-    {
-      start: 2,
-      end: 4,
-      text: "GovSource Tampa Public Safety Recruiting Summer Expo",
-    },
-    {
-      start: 1,
-      end: 7,
-      text: "Tampa Law Enforcement Hiring Expo",
+      eventId: 258,
+      eventName: "Orlando Veteran\u0027s Job Fair",
+      startTime: "2024-12-12T11:00:00",
+      endTime: "2024-12-12T15:00:00",
+      isAllDay: false,
+      locationName: null,
+      address: null,
+      cityStateZip: null,
+      eventDetails:
+        "Hillsborough County Sheriff\u0027s Office Recruiters will be at this event to explain sworn and civilian career opportunities and assist with applying to our Office.",
     },
   ];
   class CalendarEvent extends HTMLElement {
@@ -145,10 +178,10 @@
       this.render();
     }
 
-    init({ start, end, text }) {
+    init(start, end, eventContent) {
       this.setAttribute("start", start);
       this.setAttribute("end", end);
-      this.setAttribute("text", text);
+      this.setAttribute("text", eventContent.eventName);
     }
 
     loadTemplate(id) {
@@ -189,11 +222,23 @@
 
     populateEvents() {
       const eventHolder = this.querySelector(".events");
-      eventsContent.forEach((eventContent) => {
-        const event = new CalendarEvent();
-        event.init(eventContent);
-        eventHolder.appendChild(event);
-      });
+      const weekStart = this.days[0].fullDate;
+      const weekEnd = this.days[this.days.length - 1].fullDate;
+      eventsContent
+        .filter(
+          (event) =>
+            new Date(event.startTime) >= weekStart &&
+            new Date(event.endTime) <= weekEnd
+        )
+        .forEach((eventContent) => {
+          console.log("valid event in range");
+          const event = new CalendarEvent();
+          console.log(weekStart, new Date(eventContent.endTime));
+          const start = 1;
+          const end = 4;
+          event.init(start, end, eventContent);
+          eventHolder.appendChild(event);
+        });
     }
 
     populateWeekHeader() {
@@ -206,7 +251,12 @@
         if (!isThisMonth) {
           dayHeader
             .querySelector("div")
-            .classList.add("text-white", "bg-neutral-800", "opacity-30","border-neutral-500");
+            .classList.add(
+              "text-white",
+              "bg-neutral-800",
+              "opacity-30",
+              "border-neutral-500"
+            );
         }
         dayOfMonthsHolder.appendChild(dayHeader);
       }
@@ -220,6 +270,7 @@
 
   class CustomCalender extends HTMLElement {
     days = [];
+    weeks;
     selectedYear = 2024;
     selectedMonth = 7;
     firstWeekday = 0;
@@ -232,7 +283,6 @@
     attributeChangedCallback(name, oldValue, newValue) {
       this.render();
     }
-
 
     constructor() {
       super();
@@ -266,37 +316,47 @@
 
       // Add days from previous month
       for (let i = 0; i < this.firstWeekday; i++) {
-        const date = {
-          month: this.selectedMonth === 0 ? 11 : this.selectedMonth - 1,
-          year:
-            this.selectedMonth === 0
-              ? this.selectedYear - 1
-              : this.selectedYear,
-          date:
-            daysInMonth(this.selectedMonth, this.selectedMonth) +
-            i -
-            this.firstWeekday +
-            1,
+        const month = this.selectedMonth === 0 ? 11 : this.selectedMonth - 1;
+        const year =
+          this.selectedMonth === 0 ? this.selectedYear - 1 : this.selectedYear;
+        const date =
+          daysInMonth(this.selectedMonth, this.selectedMonth) +
+          i -
+          this.firstWeekday +
+          1;
+        const dateObj = {
+          month,
+          year,
+          date: date,
           weekDay: (this.firstWeekday - i) % 7,
           isToday: false,
           isThisMonth: false,
+          fullDate: new Date(
+            `${year}-${padNumber(month + 1)}-${padNumber(date)}`
+          ),
         };
-        days.push(date);
+        days.push(dateObj);
       }
       // Add days from current month
       for (let i = 0; i < this.daysThisMonth; i++) {
-        const date = {
-          month: this.selectedMonth,
-          date: i + 1,
-          year: this.selectedYear,
+        const month = this.selectedMonth;
+        const year = this.selectedYear;
+        const date = i + 1;
+        const dateObj = {
+          month,
+          year,
+          date,
           weekDay: (this.firstWeekday + i) % 7,
           isToday:
             today.getDate() == i + 1 &&
             today.getMonth() == this.selectedMonth &&
             today.getFullYear() == this.selectedYear,
           isThisMonth: true,
+          fullDate: new Date(
+            `${year}-${padNumber(month + 1)}-${padNumber(date)}`
+          ),
         };
-        days.push(date);
+        days.push(dateObj);
       }
       // Add days from next month
       for (
@@ -304,19 +364,23 @@
         i < 6;
         i++, dayOfMonth++
       ) {
-        const date = {
-          month: this.selectedMonth === 1 ? 11 : this.selectedMonth + 1,
-          year:
-            this.selectedMonth === 11
-              ? this.selectedYear + 1
-              : this.selectedYear,
+        const month = this.selectedMonth === 11 ? 0 : this.selectedMonth + 1;
+        const year =
+          this.selectedMonth === 11 ? this.selectedYear + 1 : this.selectedYear;
+        const date = (this.firstWeekday + this.days.length + i) % 7;
+        const dateObj = {
+          month,
+          year,
           dayOfMonth,
-          date: (this.firstWeekday + this.days.length + i - 1) % 7,
+          date,
           isToday: false,
           weekDay: i,
           isThisMonth: false,
+          fullDate: new Date(
+            `${year}-${padNumber(month + 1)}-${padNumber(dayOfMonth)}`
+          ),
         };
-        days.push(date);
+        days.push(dateObj);
       }
 
       return days;
@@ -324,8 +388,8 @@
 
     render() {
       this.days = this.generateDaysArray();
-      const weeks = this.generateWeeks();
-      this.querySelector(".weeks").appendChild(weeks);
+      this.weeks = this.generateWeeks();
+      this.querySelector(".weeks").appendChild(this.weeks);
     }
   }
 

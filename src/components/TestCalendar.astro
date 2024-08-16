@@ -9,22 +9,11 @@
     </div>
     <!-- Events grid -->
     <div
-      class="events border-t border-neutral-600 z-10 h-32 grid-flow-dense grid-rows-auto col-span-7 *:h-8 ps-[1px] pe-[1px] py-[1px] gap-y-[1px] gap-x-[1px] grid grid-cols-subgrid scrollbar scrollbar-thumb-neutral-200 scrollbar-track-transparent scrollbar-thumb-rounded scrollbar-h-1 scrollbar-w-1 overflow-x-hidden overflow-y-auto"
+      class="events border-neutral-600 z-10 h-32 grid-flow-dense grid-rows-auto col-span-7 *:h-8 ps-[1px] pe-[1px] py-[1px] gap-y-[1px] gap-x-[1px] grid grid-cols-subgrid scrollbar scrollbar-thumb-neutral-200 scrollbar-track-transparent scrollbar-thumb-rounded scrollbar-h-1 scrollbar-w-1 overflow-x-hidden overflow-y-auto"
     >
     </div>
   </div>
-  <style>
-    .grid-bg {
-      background-image: linear-gradient(
-        to right,
-        rgb(85, 85, 85) 1px,
-        transparent 0px
-      );
-      background-size: calc(calc(100% / 7)); /* 100% / 7 for 7 columns */
-      background-repeat: repeat;
-    }
-  </style></template
->
+</template>
 
 <template id="dayHeaderTemplate">
   <div
@@ -34,13 +23,49 @@
 </template>
 
 <template id="event-template"
-  ><div
-    class="px-3 min-h-14 ms-[4px] me-[4px] bg-teal-900 border-teal-700 border rounded scrollbar-w-1 scrollbar overflow-hidden h-0 text-sm"
-  >
-    <span class="align-middle">
-      <slot>GovSource Tampa Public Safety Recruiting Summer Expo</slot>
-    </span>
-  </div>
+  ><span class="has-tooltip">
+    <button
+      class="has-tooltip w-full px-3 min-h-14   bg-teal-900 border-teal-700 border rounded scrollbar-w-1 scrollbar h-0 text-sm overflow-y-scroll"
+      tabindex="0"
+      onfocus="this.queryselector('.text').focus()"
+    >
+      <div class="align-middle ">
+        <slot>GovSource Tampa Public Safety Recruiting Summer Expo</slot>
+      </div>
+    </button><div
+      class="tooltip rounded shadow-lg bg-secondarya border border-neutral-600 max-w-80 text-sm p-3 ml-1 text-wrap hover:cursor-auto mt-1 py-3 bg-neutral-800 "
+    >
+      <div class="text-lg pb-0 title">asdfasdfasdf</div>
+      <b></b>
+      <br />
+      <span class="location">fasdfasdfasdf</span>
+      <br />
+      <span class="address">asdasdf</span>
+      <br />
+      <span class="city-state-zip">asdfasdf</span>
+      <br />
+      <div class="mt-2 py-2 text-xm border-t details">asdfasdf</div>
+    </div>
+  </span>
+  <style is:inline scoped>
+    /* Tooltip styles */
+    .tooltip {
+      visibility: hidden;
+      position: fixed;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .has-tooltip:hover .tooltip {
+      visibility: visible;
+      z-index: 50;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .has-tooltip:focus > .tooltip {
+      visibility: visible;
+      z-index: 50;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+  </style>
 </template>
 
 <template id="calendar-template">
@@ -48,9 +73,19 @@
     class="bg-neutral-700 rounded overflow-hidden border border-neutral-600 text-lg"
   >
     <div
-      class="py-2 text-center text-lg border-b border-x-0 border-neutral-600"
+      class="py-3 px-4 text-center text-lg border-b border-x-0 border-neutral-600 flex justify-between"
     >
-      August 2024
+      <button
+        id="tw-cal-prev"
+        class="bg-neutral-600 border border-neutral-500 rounded h-[44px] w-[44px] inline-flex items-center justify-center"
+        >&lt;</button
+      >
+      <div id="tw-cal-title" class="my-auto font-bold"></div>
+      <button
+        id="tw-cal-next"
+        class="bg-neutral-600 border border-neutral-500 rounded h-[44px] w-[44px] inline-flex items-center justify-center"
+        >&gt;</button
+      >
     </div>
     <div class="grid grid-cols-7 *:text-center py-2">
       <div>Sun</div>
@@ -83,11 +118,6 @@
   //   const ampm = Number(hours) >= 12 ? "PM" : "AM";
   //   return `${Number(hours) % 12 || 12}:${minutes} ${ampm}`;
   // };
-  Date.prototype.addDays = function (days) {
-    var date = new Date(this.valueOf());
-    date.setDate(date.getDate() + days);
-    return date;
-  };
 
   const eventsContent = [
     {
@@ -194,9 +224,9 @@
       const start = this.getAttribute("start") || "1";
       const end = this.getAttribute("end") || "2";
       const color = this.getAttribute("color") || "blue";
-      const text = this.getAttribute("text") || "";
+      const text = this.getAttribute("text") || "Event Name";
 
-      const slot = this.querySelector("span");
+      const slot = this.querySelector("div");
       slot.textContent = text;
       this.style.gridColumnStart = start;
       this.style.gridColumnEnd = end;
@@ -232,12 +262,6 @@
         )
         .forEach((event) => {
           const eventElement = new CalendarEvent();
-          console.log(weekStart);
-          console.log(weekEnd);
-          console.log(new Date(event.startTime));
-          console.log(
-            (new Date(event.startTime) - weekStart) / 1000 / 60 / 60 / 24
-          );
           const start = Math.ceil(
             (new Date(event.startTime) - weekStart) / 1000 / 60 / 60 / 24
           );
@@ -261,7 +285,7 @@
             .querySelector("div")
             .classList.add(
               "text-white",
-              "bg-neutral-900",
+              "bg-neutral-800",
               "opacity-10",
               "border-neutral-100"
             );
@@ -280,9 +304,23 @@
     days = [];
     weeks;
     selectedYear = 2024;
-    selectedMonth = 8;
+    selectedMonth = 7;
     firstWeekday = 0;
     daysThisMonth = 0;
+    monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
 
     static get observedAttributes() {
       return ["year", "month"];
@@ -394,9 +432,40 @@
       return days;
     }
 
+    connectedCallback() {
+      this.querySelector("#tw-cal-prev").addEventListener("click", () =>
+        this.handlePrevMonth()
+      );
+      this.querySelector("#tw-cal-next").addEventListener("click", () =>
+        this.handleNextMonth()
+      );
+    }
+    handleNextMonth() {
+      this.selectedMonth =
+        this.selectedMonth === 11 ? 0 : this.selectedMonth + 1;
+      this.selectedYear =
+        this.selectedMonth === 0 ? this.selectedYear + 1 : this.selectedYear;
+      this.render();
+    }
+    handlePrevMonth() {
+      this.selectedMonth =
+        this.selectedMonth === 0 ? 11 : this.selectedMonth - 1;
+      this.selectedYear =
+        this.selectedMonth === 11 ? this.selectedYear - 1 : this.selectedYear;
+      this.render();
+    }
+
+    reset() {
+      this.querySelector(".weeks").innerHTML = "";
+    }
+
     render() {
+      this.reset();
       this.days = this.generateDaysArray();
       this.weeks = this.generateWeeks();
+      this.querySelector("#tw-cal-title").textContent = `${
+        this.monthNames[this.selectedMonth]
+      } ${this.selectedYear}`;
       this.querySelector(".weeks").appendChild(this.weeks);
     }
   }

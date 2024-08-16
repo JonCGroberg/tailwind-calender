@@ -35,7 +35,7 @@
 
 <template id="event-template"
   ><div
-    class="px-3 min-h-8 ms-[0px] me-[0px] bg-teal-900 border-teal-700 border rounded scrollbar-w-1 scrollbar overflow-hidden h-0 text-base"
+    class="px-3 min-h-14 ms-[4px] me-[4px] bg-teal-900 border-teal-700 border rounded scrollbar-w-1 scrollbar overflow-hidden h-0 text-sm"
   >
     <span class="align-middle">
       <slot>GovSource Tampa Public Safety Recruiting Summer Expo</slot>
@@ -230,14 +230,22 @@
             new Date(event.startTime) >= weekStart &&
             new Date(event.endTime) <= weekEnd
         )
-        .forEach((eventContent) => {
-          console.log("valid event in range");
-          const event = new CalendarEvent();
-          console.log(weekStart, new Date(eventContent.endTime));
-          const start = 1;
-          const end = 4;
-          event.init(start, end, eventContent);
-          eventHolder.appendChild(event);
+        .forEach((event) => {
+          const eventElement = new CalendarEvent();
+          console.log(weekStart);
+          console.log(weekEnd);
+          console.log(new Date(event.startTime));
+          console.log(
+            (new Date(event.startTime) - weekStart) / 1000 / 60 / 60 / 24
+          );
+          const start = Math.ceil(
+            (new Date(event.startTime) - weekStart) / 1000 / 60 / 60 / 24
+          );
+          const end = Math.ceil(
+            (new Date(event.endTime) - weekStart) / 1000 / 60 / 60 / 24
+          );
+          eventElement.init(start, end, event);
+          eventHolder.appendChild(eventElement);
         });
     }
 
@@ -253,9 +261,9 @@
             .querySelector("div")
             .classList.add(
               "text-white",
-              "bg-neutral-800",
-              "opacity-30",
-              "border-neutral-500"
+              "bg-neutral-900",
+              "opacity-10",
+              "border-neutral-100"
             );
         }
         dayOfMonthsHolder.appendChild(dayHeader);
@@ -272,7 +280,7 @@
     days = [];
     weeks;
     selectedYear = 2024;
-    selectedMonth = 7;
+    selectedMonth = 8;
     firstWeekday = 0;
     daysThisMonth = 0;
 
